@@ -25,8 +25,20 @@ class TextField {
 	public function new (text:String, size:Int, textFormat:TextEngine, font:Font, context:RenderContext, x:Float=0, y:Float=0) {
 		
 		points = textFormat.layout (font, size, text);
+		images = new Map();
 		var glyphs = font.getGlyphs (text);
-		images = font.renderGlyphs (glyphs, size);
+		var uniqueGlyphs:Array<Glyph> = [];
+		for (glyph in glyphs)
+		{
+			if (!images.exists(glyph))
+			{
+				uniqueGlyphs.push (glyph);
+				images.set (glyph, null);
+			}
+		}
+		var results = font.renderGlyphs (glyphs, size);
+		for (i in 0 ... results.length)
+			images.set(glyphs[i], results[i]);
 		
 		this.text = text;
 		this.size = size;
@@ -149,11 +161,9 @@ class TextField {
 				var format = buffer.bitsPerPixel == 1 ? GL.ALPHA : GL.RGBA;
 				texture = gl.createTexture ();
 				gl.bindTexture (gl.TEXTURE_2D, texture);
-				#if js
-				gl.texImage2D (gl.TEXTURE_2D, 0, format, format, gl.UNSIGNED_BYTE, buffer.src);
-				#else
+				gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+				gl.pixelStorei(gl.PACK_ALIGNMENT, 1);
 				gl.texImage2D (gl.TEXTURE_2D, 0, format, buffer.width, buffer.height, 0, format, gl.UNSIGNED_BYTE, buffer.data);
-				#end
 				gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 				gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 				
