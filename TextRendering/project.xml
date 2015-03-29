@@ -9,8 +9,6 @@
 	<source path="Source" />
 
 	<haxelib name="lime" />
-	
-	<haxedef name="source-map-content" if="nodejs" />
 
 	<assets path="Assets" rename="assets" exclude="lime.svg" />
 	<icon path="Assets/lime.svg" />
