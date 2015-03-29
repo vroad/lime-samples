@@ -9,6 +9,7 @@ import lime.graphics.opengl.GLUniformLocation;
 import lime.graphics.Image;
 import lime.graphics.RenderContext;
 import lime.math.Matrix4;
+import lime.text.Glyph;
 import lime.text.Font;
 import lime.text.TextLayout;
 import lime.utils.Float32Array;
@@ -152,14 +153,16 @@ class TextRender {
 	
 	
 	private var vertexBuffer:GLBuffer;
-	private var images:Map<Int, Image>;
 	private var indexBuffer:GLBuffer;
 	private var numTriangles:Int;
 	private var textLayout:TextLayout;
-	private var texture:GLTexture;
 	private var x:Float;
 	private var y:Float;
 	
+	private static var textureCaches:Array<TextureCache> = [];
+	private static var images:Map<Glyph, SubTexture> = new Map();
+	public static var textureWidth:Int = 256;
+	public static var textureHeight:Int = 128;
 	
 	public function new (textLayout:TextLayout, x:Float = 0, y:Float = 0) {
 		
@@ -167,10 +170,63 @@ class TextRender {
 		this.x = x;
 		this.y = y;
 		
-		images = textLayout.font.renderGlyphs (textLayout.glyphs, textLayout.size);
+		var glyphs:Array<Glyph> = [];
+		for (pos in textLayout.positions)
+		{
+			
+			if (!images.exists (pos.glyph))
+			{
+				
+				glyphs.push (pos.glyph);
+				images.set (pos.glyph, null);
+				
+			}
+			
+		}
+		if (glyphs.length == 0)
+			return;
+		var imageList:Array<Image> = textLayout.font.renderGlyphs (glyphs, textLayout.size);
+		var cache:TextureCache = getLastTextureCache ();
+		for (i in 0 ... imageList.length)
+		{
+			
+			var glyph:Glyph = glyphs[i];
+			var img:Image = imageList[i];
+			var subTexture:SubTexture = cache.addImage (img);
+			if (subTexture == null)
+				throw "Ran out of font texture cache";
+			images.set (glyph, subTexture);
+			
+		}
 		
 	}
 	
+	private function getLastTextureCache ()
+	{
+		
+		if (textureCaches.length == 0)
+		{
+			
+			var cache = new TextureCache (textureWidth, textureHeight);
+			textureCaches.push (cache);
+			return cache;
+			
+		}
+		else
+			return textureCaches[ textureCaches.length - 1 ];
+		
+	}
+	
+	private function addTextureCache (minWidth:Int, minHeight:Int):TextureCache
+	{
+		
+		var width = textureWidth > minWidth ? textureWidth : minWidth;
+		var height = textureHeight > minHeight ? textureHeight : minHeight;
+		var cache = new TextureCache (width, height);
+		textureCaches.push (cache);
+		return cache;
+		
+	}
 	
 	public function init (context:RenderContext) {
 		
@@ -196,25 +252,21 @@ class TextRender {
 					
 				}
 				
-				var buffer = null;
-				
 				for (position in textLayout.positions) {
 					
-					if (images.exists (position.glyph)) {
+					var subTexture:SubTexture = images.get (position.glyph);
+					
+					if (subTexture != null) {
 						
-						var image = images.get (position.glyph);
+						left = subTexture.rect.x / subTexture.textureWidth;
+						top = subTexture.rect.y / subTexture.textureHeight;
+						right = left + subTexture.rect.width / subTexture.textureWidth;
+						bottom = top + subTexture.rect.height / subTexture.textureHeight;
 						
-						buffer = image.buffer;
-						
-						left = image.offsetX / buffer.width;
-						top = image.offsetY / buffer.height;
-						right = left + image.width / buffer.width;
-						bottom = top + image.height / buffer.height;
-						
-						var pointLeft = x + position.offset.x + image.x;
-						var pointTop = y + position.offset.y - image.y;
-						var pointRight = pointLeft + image.width;
-						var pointBottom = pointTop + image.height;
+						var pointLeft = x + position.offset.x + subTexture.x;
+						var pointTop = y + position.offset.y - subTexture.y;
+						var pointRight = pointLeft + subTexture.rect.width;
+						var pointBottom = pointTop + subTexture.rect.height;
 						
 						vertices.push (pointRight);
 						vertices.push (pointBottom);
@@ -261,13 +313,6 @@ class TextRender {
 				gl.bindBuffer (gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
 				gl.bufferData (gl.ELEMENT_ARRAY_BUFFER, new UInt8Array (indices), gl.STATIC_DRAW);
 				
-				var format = (buffer.bitsPerPixel == 1 ? gl.ALPHA : gl.RGBA);
-				texture = gl.createTexture ();
-				gl.bindTexture (gl.TEXTURE_2D, texture);
-				gl.texImage2D (gl.TEXTURE_2D, 0, format, buffer.width, buffer.height, 0, format, gl.UNSIGNED_BYTE, buffer.data);
-				gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-				gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-				
 			default:
 				
 			
@@ -283,7 +328,7 @@ class TextRender {
 			case OPENGL (gl):
 				
 				gl.activeTexture (gl.TEXTURE0);
-				gl.bindTexture (gl.TEXTURE_2D, texture);
+				gl.bindTexture (gl.TEXTURE_2D, getLastTextureCache().texture);
 				
 				gl.bindBuffer (gl.ARRAY_BUFFER, vertexBuffer);
 				gl.vertexAttribPointer (vertexAttribute, 2, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 0);
