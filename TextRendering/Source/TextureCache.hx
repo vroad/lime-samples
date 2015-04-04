@@ -35,12 +35,13 @@ class TextureCache
 
 	public function addImage (image:Image):SubTexture
 	{
-		
-		var rect:Rect = binPack.quickInsert (image.width + 1, image.height + 1);
+        var imgWidth:Int = (image.width == this.width) ? image.width : image.width + 1;
+        var imgHeight:Int = (image.height == this.height) ? image.height : image.height + 1;
+		var rect:Rect = binPack.quickInsert (imgWidth, imgHeight);
 		if (rect.height == 0)
 			return null;
-		rect.width -= 1;
-		rect.height -= 1;
+		rect.width = image.width;
+		rect.height = image.height;
 		
 		GL.bindTexture (GL.TEXTURE_2D, texture);
 		GL.pixelStorei (GL.UNPACK_ALIGNMENT, 1);
