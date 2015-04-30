@@ -1,5 +1,5 @@
 //http://glsl.heroku.com/e#6162.0
-
+precision highp float;
 
 #define PI 3.141592653589793
 

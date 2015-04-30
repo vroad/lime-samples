@@ -1,5 +1,5 @@
 //http://glsl.heroku.com/e#5891.5
-
+precision highp float;
 
 uniform float time;
 uniform vec2 mouse;

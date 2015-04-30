@@ -1,5 +1,5 @@
 //http://glsl.heroku.com/e#6147.1
-
+precision highp float;
 
 #define PI 3.14159265
 uniform float time;
