@@ -192,6 +192,8 @@ class TextRender {
 			
 			var glyph:Glyph = glyphs[i];
 			var img:Image = imageList[i];
+			if (img == null)
+				continue;
 			var subTexture:SubTexture = cache.addImage (img);
 			if (subTexture == null)
 				throw "Ran out of font texture cache";
