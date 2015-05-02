@@ -1,5 +1,5 @@
 //http://glsl.heroku.com/e#5359.8
-
+precision highp float;
 
 uniform float time;
 uniform vec2 resolution;
