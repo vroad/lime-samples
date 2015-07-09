@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	
+	<meta title="Simple Video" package="org.openfl.lime.samples.simplevideo" version="1.0.0" company="OpenFL" />
+	<app main="Main" path="Export" file="SimpleVideo" />
+    <window width="1280" height="720" vsync="true" background="#FFFFFF" resizable="false" fullscreen="false" />
+	
+	<source path="Source" />
+	
+	<haxelib name="lime" />
+	
+	<assets path="Assets" rename="assets" exclude="*.svg" />
+	<icon path="Assets/lime.svg" />
+	
+</project>
