@@ -7,11 +7,12 @@ import lime.graphics.opengl.GLProgram;
 import lime.graphics.opengl.GLTexture;
 import lime.graphics.opengl.GLUniformLocation;
 import lime.graphics.Image;
-import lime.graphics.RenderContext;
+import lime.graphics.Renderer;
 import lime.math.Matrix4;
 import lime.text.Glyph;
 import lime.text.Font;
 import lime.text.TextLayout;
+import lime.ui.Window;
 import lime.utils.Float32Array;
 import lime.utils.GLUtils;
 import lime.utils.UInt8Array;
@@ -36,7 +37,7 @@ class Main extends Application {
 	}
 	
 	
-	public override function init (context:RenderContext):Void {
+	public override function onPreloadComplete ():Void {
 		
 		var font = Assets.getFont ("assets/amiri-regular.ttf");
 		var textLayout = new TextLayout ("صِف خَلقَ خَودِ كَمِثلِ الشَمسِ إِذ بَزَغَت — يَحظى الضَجيعُ بِها نَجلاءَ مِعطارِ", font, 16, RIGHT_TO_LEFT, ARABIC, "ar");
@@ -49,7 +50,18 @@ class Main extends Application {
 		var textLayout = new TextLayout ("懶惰的姜貓", font, 32, TOP_TO_BOTTOM, HAN, "zh");
 		textFields.push (new TextRender (textLayout, 50, 170));
 		
-		switch (context) {
+		for (textField in textFields) {
+			
+			textField.init (this);
+			
+		}
+		
+	}
+	
+	
+	public override function onWindowCreate (window:Window):Void {
+		
+		switch (window.renderer.context) {
 			
 			case OPENGL (gl):
 				
@@ -107,25 +119,19 @@ class Main extends Application {
 			
 		}
 		
-		for (textField in textFields) {
-			
-			textField.init (context);
-			
-		}
-		
 	}
 	
 	
-	public override function render (context:RenderContext):Void {
+	public override function render (renderer:Renderer):Void {
 		
-		switch (context) {
+		switch (renderer.context) {
 			
 			case OPENGL (gl):
 				
-				var r = ((config.background >> 16) & 0xFF) / 0xFF;
-				var g = ((config.background >> 8) & 0xFF) / 0xFF;
-				var b = (config.background & 0xFF) / 0xFF;
-				var a = ((config.background >> 24) & 0xFF) / 0xFF;
+				var r = ((config.windows[0].background >> 16) & 0xFF) / 0xFF;
+				var g = ((config.windows[0].background >> 8) & 0xFF) / 0xFF;
+				var b = (config.windows[0].background & 0xFF) / 0xFF;
+				var a = ((config.windows[0].background >> 24) & 0xFF) / 0xFF;
 				
 				gl.clearColor (r, g, b, a);
 				gl.clear (gl.COLOR_BUFFER_BIT);
@@ -135,7 +141,7 @@ class Main extends Application {
 				
 				for (textField in textFields) {
 					
-					textField.render (context, vertexAttribute, textureAttribute);
+					textField.render (renderer, vertexAttribute, textureAttribute);
 					
 				}
 				
@@ -230,9 +236,9 @@ class TextRender {
 		
 	}
 	
-	public function init (context:RenderContext) {
+	public function init (application:Application) {
 		
-		switch (context) {
+		switch (application.renderer.context) {
 			
 			case OPENGL (gl):
 				
@@ -323,9 +329,9 @@ class TextRender {
 	}
 	
 	
-	public function render (context:RenderContext, vertexAttribute:Int, textureAttribute:Int) {
+	public function render (renderer:Renderer, vertexAttribute:Int, textureAttribute:Int) {
 		
-		switch (context) {
+		switch (renderer.context) {
 			
 			case OPENGL (gl):
 				

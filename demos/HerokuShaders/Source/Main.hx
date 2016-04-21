@@ -8,7 +8,8 @@ import lime.graphics.opengl.GLBuffer;
 import lime.graphics.opengl.GLProgram;
 import lime.graphics.opengl.GLShader;
 import lime.graphics.opengl.GLUniformLocation;
-import lime.graphics.RenderContext;
+import lime.graphics.Renderer;
+import lime.ui.Window;
 import lime.utils.Float32Array;
 import lime.Assets;
 
@@ -117,11 +118,20 @@ class Main extends Application {
 		return shader;
 		
 	}
+
+
+	public override function onPreloadComplete ()
+	{
+		// http://community.openfl.org/t/lime-assets-load-fail/6644
+		// In short, HTML5 isn't able to load assets in onWindowCreate, so
+		// do it in onPreloadComplete instead.
+		compile ();
+	}
 	
 	
-	public override function init (context:RenderContext):Void {
+	public override function onWindowCreate (window:Window):Void {
 		
-		switch (context) {
+		switch (window.renderer.context) {
 			
 			case OPENGL (gl):
 				
@@ -132,8 +142,6 @@ class Main extends Application {
 				gl.bindBuffer (gl.ARRAY_BUFFER, buffer);
 				gl.bufferData (gl.ARRAY_BUFFER, new Float32Array ([ -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 ]), gl.STATIC_DRAW);
 				gl.bindBuffer (gl.ARRAY_BUFFER, null);
-				
-				compile ();
 				
 			default:
 				
@@ -161,9 +169,9 @@ class Main extends Application {
 	}
 	
 	
-	public override function render (context:RenderContext):Void {
+	public override function render (renderer:Renderer):Void {
 		
-		switch (context) {
+		switch (renderer.context) {
 			
 			case OPENGL (gl):
 				

@@ -7,6 +7,8 @@ import lime.graphics.RenderContext;
 import lime.math.Vector2;
 import lime.ui.KeyCode;
 import lime.ui.KeyModifier;
+import lime.ui.Touch;
+import lime.ui.Window;
 import openfl.display.Sprite;
 import openfl.display.Stage;
 
@@ -34,7 +36,7 @@ class Main extends Application {
 		
 		super.create (config);
 		
-		stage = new Stage (window.width, window.height, 0xFFFFFF);
+		stage = new Stage (window, 0xFFFFFF);
 		square = new Sprite ();
 		
 		var fill = new Sprite ();
@@ -53,7 +55,7 @@ class Main extends Application {
 	}
 	
 	
-	public override function onKeyDown (key:KeyCode, modifier:KeyModifier):Void {
+	public override function onKeyDown (window:Window, key:KeyCode, modifier:KeyModifier):Void {
 		
 		switch (key) {
 			
@@ -68,7 +70,7 @@ class Main extends Application {
 	}
 	
 	
-	public override function onKeyUp (key:KeyCode, modifier:KeyModifier):Void {
+	public override function onKeyUp (window:Window, key:KeyCode, modifier:KeyModifier):Void {
 		
 		switch (key) {
 			
@@ -83,7 +85,7 @@ class Main extends Application {
 	}
 	
 	
-	public override function onMouseDown (x:Float, y:Float, button:Int):Void {
+	public override function onMouseDown (window:Window, x:Float, y:Float, button:Int):Void {
 		
 		if (targetPoint == null) {
 			
@@ -97,7 +99,7 @@ class Main extends Application {
 	}
 	
 	
-	public override function onMouseMove (x:Float, y:Float):Void {
+	public override function onMouseMove (window:Window, x:Float, y:Float):Void {
 		
 		if (targetPoint != null) {
 			
@@ -109,33 +111,33 @@ class Main extends Application {
 	}
 	
 	
-	public override function onMouseUp (x:Float, y:Float, button:Int):Void {
+	public override function onMouseUp (window:Window, x:Float, y:Float, button:Int):Void {
 		
 		targetPoint = null;
 		
 	}
 	
 	
-	public override function onTouchEnd (x:Float, y:Float, id:Int):Void {
+	public override function onTouchEnd (touch:Touch):Void {
 		
 		targetPoint = null;
 		
 	}
 	
 	
-	public override function onTouchMove (x:Float, y:Float, button:Int):Void {
+	public override function onTouchMove (touch:Touch):Void {
 		
 		if (targetPoint != null) {
 			
-			targetPoint.x = x;
-			targetPoint.y = y;
+			targetPoint.x = touch.x * window.width;
+			targetPoint.y = touch.y * window.height;
 			
 		}
 		
 	}
 	
 	
-	public override function onTouchStart (x:Float, y:Float, id:Int):Void {
+	public override function onTouchStart (touch:Touch):Void {
 		
 		if (targetPoint == null) {
 			
@@ -143,8 +145,8 @@ class Main extends Application {
 			
 		}
 		
-		targetPoint.x = x;
-		targetPoint.y = y;
+		targetPoint.x = touch.x * window.width;
+		targetPoint.y = touch.y * window.height;
 		
 	}
 	
