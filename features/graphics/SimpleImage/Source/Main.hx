@@ -84,10 +84,10 @@ class Main extends Application {
 					
 					var fragmentSource = 
 						
-						#if !desktop
-						"precision mediump float;" +
-						#end
-						"varying vec2 vTexCoord;
+						"#if GL_ES
+						precision mediump float;
+						#endif
+						varying vec2 vTexCoord;
 						uniform sampler2D uImage0;
 						
 						void main(void)
