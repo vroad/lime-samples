@@ -66,12 +66,13 @@ class Main extends Application {
 		GL.deleteShader (fs);
 		
 		GL.linkProgram (program);
+		var error = GL.getError ();
 		
 		if (GL.getProgramParameter (program, GL.LINK_STATUS) == 0) {
 			
 			trace (GL.getProgramInfoLog (program));
 			trace ("VALIDATE_STATUS: " + GL.getProgramParameter (program, GL.VALIDATE_STATUS));
-			trace ("ERROR: " + GL.getError ());
+			trace ("ERROR: " + error);
 			return;
 			
 		}
