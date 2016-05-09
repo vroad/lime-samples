@@ -92,10 +92,10 @@ class GLRenderer {
 		
 		var fragmentSource = 
 			
-			#if (!desktop || rpi)
-			"precision mediump float;" +
-			#end
-			"varying vec2 vTexCoord;
+			"#ifdef GL_ES
+			precision mediump float;
+			#endif
+			varying vec2 vTexCoord;
 			uniform sampler2D uImage0;
 			
 			void main (void) {
@@ -124,11 +124,7 @@ class GLRenderer {
 		gl.bindTexture (gl.TEXTURE_2D, texture);
 		gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		#if js
-		gl.texImage2D (gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image.src);
-		#else
 		gl.texImage2D (gl.TEXTURE_2D, 0, gl.RGBA, image.buffer.width, image.buffer.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image.data);
-		#end
 		gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		
